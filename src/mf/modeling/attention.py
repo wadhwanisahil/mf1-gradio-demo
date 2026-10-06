@@ -137,6 +137,8 @@ def _sdpa_with_kvcache(
 
 @lru_cache(maxsize=1)
 def _load_flash_attn_with_kvcache() -> FlashAttentionWithKVCache:
+    if os.environ.get("MF_ATTENTION_BACKEND", "flex") == "sdpa":
+        return _sdpa_with_kvcache
     try:
         from flash_attn import flash_attn_with_kvcache
     except (ImportError, OSError):
@@ -188,6 +190,8 @@ def _run_flex_attention(
     value: Tensor,
     block_mask: object,
 ) -> Tensor:
+    if os.environ.get("MF_ATTENTION_BACKEND", "flex") == "sdpa":
+        return _run_masked_sdpa(query, key, value, block_mask)
     compiled = _load_compiled_flex_attention(backend)
     if backend == "fa4":
         return compiled(query, key, value, block_mask=block_mask)
@@ -197,6 +201,27 @@ def _run_flex_attention(
         value,
         block_mask=block_mask,
         kernel_options=_flex_kernel_options(backend),
+    )
+
+
+def _run_masked_sdpa(
+    query: Tensor, key: Tensor, value: Tensor, block_mask: object
+) -> Tensor:
+    """Evaluate MF's exact chunk mask using portable PyTorch attention.
+
+    MF mask functions ignore batch/head because the packed routing encodes
+    sequence membership in token indices. The dense boolean mask preserves
+    that routing; it is not a replacement with ordinary causal attention.
+    """
+    mask = getattr(block_mask, "_mf_dense_mask", None)
+    if mask is None:
+        query_index = torch.arange(query.shape[-2], device=query.device)[:, None]
+        key_index = torch.arange(key.shape[-2], device=key.device)[None, :]
+        zero = torch.zeros((), dtype=torch.long, device=query.device)
+        mask = block_mask.mask_mod(zero, zero, query_index, key_index)
+        block_mask._mf_dense_mask = mask
+    return F.scaled_dot_product_attention(
+        query, key, value, attn_mask=mask, dropout_p=0.0, is_causal=False
     )
 
 

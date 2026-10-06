@@ -1,0 +1,137 @@
+{
+  "url": "http://127.0.0.1:7860",
+  "started_at_unix": 1791279750.6891105,
+  "endpoints": [
+    {
+      "endpoint": "/generate_image",
+      "task": "text-to-image",
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 25.31,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.71
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 32,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-endpoints/generate_image.png"
+    },
+    {
+      "endpoint": "/generate_unconditional",
+      "task": "unconditional-image",
+      "status": "passed",
+      "metadata": {
+        "task": "unconditional-image",
+        "seed": 42,
+        "elapsed_seconds": 12.76,
+        "peak_allocated_vram_gib": 3.35,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.35,
+          "cuda:1": 1.57
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "steps": 32,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-endpoints/generate_unconditional.png"
+    },
+    {
+      "endpoint": "/analyze_image",
+      "task": "image-to-text",
+      "text": "The image depicts an astronaut wearing a white space suit, floating in the blackness of space. The astronaut is",
+      "status": "passed",
+      "metadata": {
+        "task": "image-to-text",
+        "seed": 42,
+        "elapsed_seconds": 15.26,
+        "peak_allocated_vram_gib": 3.62,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.62,
+          "cuda:1": 1.75
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "question": "Describe this image in detail.",
+        "target_length": 64,
+        "steps": 16,
+        "cfg_scale": 2.0
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-endpoints/analyze_image.txt"
+    },
+    {
+      "endpoint": "/continue_text",
+      "task": "text-continuation",
+      "text": "represent a wide range of types of data through digital formats, such as images, audio, text, and videos. These representations are widely applied to data in digital imaging, content analysis, and media analysis. In recent applications, continuous multimodal representations have been used to model biological systems like graphural data,",
+      "status": "passed",
+      "metadata": {
+        "task": "text-continuation",
+        "seed": 42,
+        "elapsed_seconds": 7.02,
+        "peak_allocated_vram_gib": 3.24,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.24,
+          "cuda:1": 0.14
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "Continuous multimodal representations make it possible to",
+        "target_length": 64,
+        "steps": 16,
+        "cfg_scale": 2.0,
+        "stop": []
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-endpoints/continue_text.txt"
+    }
+  ],
+  "runtime": {
+    "mode": "real",
+    "loaded": true,
+    "model": "Multimodal Flow 1.6B SFT",
+    "device": "NVIDIA GeForce RTX 2080 SUPER",
+    "compute_capability": "7.5",
+    "vram_gib": 7.6,
+    "weights": "ema",
+    "checkpoint": "/dev/shm/mf1-models/MF_weights/MF/sft",
+    "load_seconds": 19.99,
+    "release_codecs_on_task_switch": true,
+    "precision": "fp16",
+    "codec_precision": "fp32",
+    "codec_device": "cuda:1",
+    "attention_backend": "sdpa",
+    "experimental": true,
+    "vram_warning": "Only 7.6 GiB VRAM is visible; 20+ GiB is recommended. Close other GPU applications and expect possible out-of-memory errors."
+  },
+  "gpu_monitor": {
+    "csv": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-endpoints/gpu.csv",
+    "interval_seconds": 0.5,
+    "samples": 232,
+    "devices": {
+      "0": {
+        "uuid": "GPU-835f8262-5251-9f0f-5dc4-013fa2f735de",
+        "name": "NVIDIA GeForce RTX 2080 SUPER",
+        "total_mib": 8192.0,
+        "peak_used_mib": 3926.0,
+        "peak_utilization_percent": 92.0
+      },
+      "1": {
+        "uuid": "GPU-aec1288f-4556-3b77-af1b-45bf7ee3d8f5",
+        "name": "NVIDIA GeForce RTX 2080 SUPER",
+        "total_mib": 8192.0,
+        "peak_used_mib": 2527.0,
+        "peak_utilization_percent": 33.0
+      }
+    },
+    "errors": [],
+    "scope": "whole-device memory, including other processes; sampled peaks"
+  },
+  "completed_at_unix": 1791279812.336532
+}

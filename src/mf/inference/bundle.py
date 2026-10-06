@@ -11,6 +11,7 @@ import torch
 from torch import nn
 
 from mf.codecs.text_decoder import LatentTextDecoder
+from mf.codecs.placement import DeviceCodec
 from mf.config.schema import MFConfig
 from mf.contracts.batch import TEXT_PREFIX_TOKENS
 from mf.contracts.text import ResolvedTextContract, resolve_text_contract
@@ -225,6 +226,18 @@ class InferenceBundle:
     _text_encoder: nn.Module | None = field(default=None, repr=False)
     _vision_encoder: nn.Module | None = field(default=None, repr=False)
     _vision_decoder: nn.Module | None = field(default=None, repr=False)
+    inference_dtype: torch.dtype | None = None
+    codec_device: torch.device | None = None
+
+    def _place_codec(self, codec: nn.Module, *, encoder: bool) -> nn.Module:
+        target = self.codec_device or self.device
+        # FP32 encoders avoid FP16 overflow in T5/SigLIP while the MF backbone
+        # uses FP16. The released BF16 path retains its original codec precision.
+        dtype = (
+            torch.float32 if self.inference_dtype == torch.float16 else torch.bfloat16
+        ) if encoder else None
+        codec = codec.to(device=target, dtype=dtype).eval()
+        return DeviceCodec(codec, target) if target != self.device else codec
 
     @property
     def text_encoder(self) -> nn.Module:
@@ -232,7 +245,7 @@ class InferenceBundle:
             from mf.codecs.factory import build_text_encoder
 
             encoder = build_text_encoder(self.config.codecs.text)
-            self._text_encoder = encoder.to(self.device, dtype=torch.bfloat16).eval()
+            self._text_encoder = self._place_codec(encoder, encoder=True)
         return self._text_encoder
 
     @property
@@ -241,7 +254,7 @@ class InferenceBundle:
             from mf.codecs.factory import build_vision_encoder
 
             encoder = build_vision_encoder(self.config.codecs.vision)
-            self._vision_encoder = encoder.to(self.device, dtype=torch.bfloat16).eval()
+            self._vision_encoder = self._place_codec(encoder, encoder=True)
         return self._vision_encoder
 
     @property
@@ -250,7 +263,7 @@ class InferenceBundle:
             from mf.codecs.factory import build_vision_decoder
 
             decoder = build_vision_decoder(self.config.codecs.vision)
-            self._vision_decoder = decoder.to(self.device).eval()
+            self._vision_decoder = self._place_codec(decoder, encoder=False)
         return self._vision_decoder
 
     def close(self) -> None:
@@ -269,6 +282,8 @@ def load_bundle(
     compile_blocks: bool = False,
     sequence_bucket_size: int | None = None,
     extensions: Sequence[str] = (),
+    inference_dtype: torch.dtype | None = None,
+    codec_device: str | torch.device | None = None,
 ) -> InferenceBundle:
     """Build the model and text decoder from a checkpoint directory."""
 
@@ -278,6 +293,8 @@ def load_bundle(
     load_extensions(extensions)
     root = Path(checkpoint_dir).expanduser().resolve(strict=True)
     resolved_device = torch.device(device)
+    if inference_dtype not in (None, torch.bfloat16, torch.float16):
+        raise ValueError("inference_dtype must be BF16, FP16, or None")
     config = _inference_config(
         _resolve_package_paths(read_checkpoint_config(root), root),
         compile_blocks=compile_blocks,
@@ -333,6 +350,12 @@ def load_bundle(
                 if name not in _LEGACY_REMOVED_MODEL_KEYS
             }
         model.load_state_dict(model_state, strict=True)
+    if inference_dtype == torch.float16:
+        # Preserve FP32 boundaries and statistics rather than casting the whole
+        # model indiscriminately. Released BF16 weights remain on disk unchanged.
+        for parameter in model.parameters():
+            if parameter.dtype == torch.bfloat16:
+                parameter.data = parameter.data.to(dtype=torch.float16)
     model = model.to(resolved_device).eval()
 
     text_decoder = LatentTextDecoder(
@@ -376,6 +399,8 @@ def load_bundle(
     return InferenceBundle(
         config=config,
         device=resolved_device,
+        inference_dtype=inference_dtype,
+        codec_device=torch.device(codec_device) if codec_device is not None else None,
         model=model,
         text_decoder=text_decoder,
         tokenizer=tokenizer,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -16,6 +17,7 @@ if str(DEMO_DIR) not in sys.path:
     sys.path.insert(0, str(DEMO_DIR))
 
 from mf_demo.backend import MFBackend, RuntimeOptions  # noqa: E402
+from mf_demo.monitor import GPUMonitor  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -28,7 +30,19 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=REPO_ROOT / "docs" / "assets" / "astronaut.png",
     )
-    parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--device", default=os.environ.get("MF_DEVICE", "cuda:0"))
+    parser.add_argument(
+        "--precision", choices=("bf16", "fp16"), default=os.environ.get("MF_PRECISION", "bf16")
+    )
+    parser.add_argument("--codec-device", default=os.environ.get("MF_CODEC_DEVICE"))
+    parser.add_argument(
+        "--attention-backend",
+        choices=("flex", "sdpa"),
+        default=os.environ.get("MF_ATTENTION_BACKEND", "flex"),
+    )
+    parser.add_argument(
+        "--allow-low-vram", action="store_true", default=os.environ.get("MF_ALLOW_LOW_VRAM") == "1"
+    )
     parser.add_argument("--weights", choices=("ema", "raw"), default="ema")
     parser.add_argument("--image-steps", type=int, default=64)
     return parser.parse_args()
@@ -43,8 +57,14 @@ def main() -> int:
         assets_root=args.assets_root,
         device=args.device,
         weights=args.weights,
+        precision=args.precision,
+        codec_device=args.codec_device,
+        attention_backend=args.attention_backend,
+        allow_low_vram=args.allow_low_vram,
     )
     backend = MFBackend(options)
+    monitor = GPUMonitor(output_dir / "gpu.csv")
+    monitor.start()
     evidence: dict[str, object] = {
         "started_at_unix": time.time(),
         "input_image": str(args.input_image.resolve()),
@@ -91,6 +111,8 @@ def main() -> int:
         image.save(output_dir / "text_to_image.png")
         evidence["text_to_image"] = {"metadata": image_meta}
         evidence["completed_at_unix"] = time.time()
+        monitor.stop()
+        evidence["gpu_monitor"] = monitor.summary()
         (output_dir / "report.json").write_text(
             json.dumps(evidence, indent=2),
             encoding="utf-8",
@@ -100,6 +122,8 @@ def main() -> int:
     except Exception as error:  # noqa: BLE001 - persist the exact integration failure
         evidence["error"] = repr(error)
         evidence["failed_at_unix"] = time.time()
+        monitor.stop()
+        evidence["gpu_monitor"] = monitor.summary()
         (output_dir / "report.json").write_text(
             json.dumps(evidence, indent=2),
             encoding="utf-8",
@@ -107,6 +131,7 @@ def main() -> int:
         print(f"Smoke test failed: {error}", file=sys.stderr)
         return 1
     finally:
+        monitor.stop()
         backend.close()
 
 

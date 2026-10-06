@@ -1,0 +1,417 @@
+{
+  "started_at_unix": 1791277183.355135,
+  "experiments": [
+    {
+      "name": "image_ode_16_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "2cf5bbdcb4986607f12cb9145087c585e3c706e9eebbbd02f9dd5114b5172a93",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 13.77,
+        "peak_allocated_vram_gib": 3.43,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.43,
+          "cuda:1": 1.71
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 16,
+        "cfg_scale": 2.0,
+        "method": "ode"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_ode_16_seed42.png"
+    },
+    {
+      "name": "image_sde_16_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "ee580f696a15cca8372df7fdedfcd56642f3c9b04101a48b61ce83d9e9c3d11a",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 10.57,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 16,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_sde_16_seed42.png"
+    },
+    {
+      "name": "image_ode_32_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "c2ea2b028a6e403b8fb3c43516d3b4f29dce40419748b65fcfaaf392c74bc16d",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 21.14,
+        "peak_allocated_vram_gib": 3.43,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.43,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 32,
+        "cfg_scale": 2.0,
+        "method": "ode"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_ode_32_seed42.png"
+    },
+    {
+      "name": "image_sde_32_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "7d8fcc17a65221ad1e4cdfa4f3c29efd8e1085604892cf2af20632d30f34aede",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 21.13,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 32,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_sde_32_seed42.png"
+    },
+    {
+      "name": "image_ode_64_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "39d9f65f34d104db563cd1ae178e102ee8a3b1c54b164fcd3ab17316145416b1",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 42.18,
+        "peak_allocated_vram_gib": 3.43,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.43,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 64,
+        "cfg_scale": 2.0,
+        "method": "ode"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_ode_64_seed42.png"
+    },
+    {
+      "name": "image_sde_64_seed42",
+      "task": "text-to-image",
+      "pixel_sha256": "a33aa846d78a57467132e6c5fce59130e468dd349dbf1232a7d8c0ca2ab7ad25",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 42.38,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 64,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_sde_64_seed42.png"
+    },
+    {
+      "name": "image_sde_64_seed43",
+      "task": "text-to-image",
+      "pixel_sha256": "6ac8dacf311e44f062762ae0a8b6f23183d38c4fffb1a306e9d940db0fa1aa46",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 43,
+        "elapsed_seconds": 42.19,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 64,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_sde_64_seed43.png"
+    },
+    {
+      "name": "image_sde_64_seed42_repeat",
+      "task": "text-to-image",
+      "pixel_sha256": "a33aa846d78a57467132e6c5fce59130e468dd349dbf1232a7d8c0ca2ab7ad25",
+      "image_size": [
+        224,
+        224
+      ],
+      "status": "passed",
+      "metadata": {
+        "task": "text-to-image",
+        "seed": 42,
+        "elapsed_seconds": 42.29,
+        "peak_allocated_vram_gib": 3.44,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.44,
+          "cuda:1": 1.8
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+        "steps": 64,
+        "cfg_scale": 2.0,
+        "method": "sde"
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/image_sde_64_seed42_repeat.png"
+    },
+    {
+      "name": "caption_8_seed42",
+      "task": "image-to-text",
+      "text": "The image depicts an astronaut in a white spacesuit floating through the air in space. The astronaut appears to be suspended under the helmet, preparing to venture into the distance from the distance. There is no visibility on his lunette's position or the outer ground of the Earth as he gazes from the",
+      "status": "passed",
+      "metadata": {
+        "task": "image-to-text",
+        "seed": 42,
+        "elapsed_seconds": 9.51,
+        "peak_allocated_vram_gib": 3.62,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.62,
+          "cuda:1": 1.75
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "question": "Describe this image in detail.",
+        "target_length": 64,
+        "steps": 8,
+        "cfg_scale": 2.0
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/caption_8_seed42.txt"
+    },
+    {
+      "name": "caption_16_seed42",
+      "task": "image-to-text",
+      "text": "The image depicts an astronaut wearing a white space suit, floating in the blackness of space. The astronaut is",
+      "status": "passed",
+      "metadata": {
+        "task": "image-to-text",
+        "seed": 42,
+        "elapsed_seconds": 11.72,
+        "peak_allocated_vram_gib": 3.62,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.62,
+          "cuda:1": 1.75
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "question": "Describe this image in detail.",
+        "target_length": 64,
+        "steps": 16,
+        "cfg_scale": 2.0
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/caption_16_seed42.txt"
+    },
+    {
+      "name": "caption_32_seed42",
+      "task": "image-to-text",
+      "text": "The image depicts an astronaut wearing a white space suit, floating in the blackness of space. The astronaut is in mid-air, capturing the breathtaking moment of floating through place in the vastness. The suit's suit, or the reflective visor of the helmet, is visible on the chest,",
+      "status": "passed",
+      "metadata": {
+        "task": "image-to-text",
+        "seed": 42,
+        "elapsed_seconds": 22.6,
+        "peak_allocated_vram_gib": 3.62,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.62,
+          "cuda:1": 1.75
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "question": "Describe this image in detail.",
+        "target_length": 64,
+        "steps": 32,
+        "cfg_scale": 2.0
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/caption_32_seed42.txt"
+    },
+    {
+      "name": "text_8_seed42",
+      "task": "text-continuation",
+      "text": "represent diverse and  various forms of data, such as text, audio, images, and video information in any terms. These representations enable more flexible to customize, analyze, and interpret data in various contexts. For instance, software applications and various scientific applications and databases of content creation technologies applications require multimodal representations",
+      "status": "passed",
+      "metadata": {
+        "task": "text-continuation",
+        "seed": 42,
+        "elapsed_seconds": 3.94,
+        "peak_allocated_vram_gib": 3.24,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.24,
+          "cuda:1": 0.14
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "Continuous multimodal representations make it possible to",
+        "target_length": 64,
+        "steps": 8,
+        "cfg_scale": 2.0,
+        "stop": []
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/text_8_seed42.txt"
+    },
+    {
+      "name": "text_16_seed42",
+      "task": "text-continuation",
+      "text": "represent a wide range of types of data through digital formats, such as images, audio, text, and videos. These representations are widely applied to data in digital imaging, content analysis, and media analysis. In recent applications, continuous multimodal representations have been used to model biological systems like graphural data,",
+      "status": "passed",
+      "metadata": {
+        "task": "text-continuation",
+        "seed": 42,
+        "elapsed_seconds": 5.95,
+        "peak_allocated_vram_gib": 3.24,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.24,
+          "cuda:1": 0.14
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "Continuous multimodal representations make it possible to",
+        "target_length": 64,
+        "steps": 16,
+        "cfg_scale": 2.0,
+        "stop": []
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/text_16_seed42.txt"
+    },
+    {
+      "name": "text_32_seed42",
+      "task": "text-continuation",
+      "text": "represent a wide range of types of audio and digital content, such as images, videos, music, and games. These representations are often characterized by their fluid and dynamic nature, which allows them to capture the various conditions and activities of a scene or sequence of events in real time. Integrating a",
+      "status": "passed",
+      "metadata": {
+        "task": "text-continuation",
+        "seed": 42,
+        "elapsed_seconds": 11.38,
+        "peak_allocated_vram_gib": 3.24,
+        "peak_allocated_vram_by_device_gib": {
+          "cuda:0": 3.24,
+          "cuda:1": 0.14
+        },
+        "precision": "fp16",
+        "attention_backend": "sdpa",
+        "prompt": "Continuous multimodal representations make it possible to",
+        "target_length": 64,
+        "steps": 32,
+        "cfg_scale": 2.0,
+        "stop": []
+      },
+      "artifact": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/text_32_seed42.txt"
+    }
+  ],
+  "design": {
+    "image_prompt": "A quiet observatory above the clouds, cinematic moonlight.",
+    "text_prompt": "Continuous multimodal representations make it possible to",
+    "caption_question": "Describe this image in detail.",
+    "caption_input": "/home/nancy/Desktop/sahil/mf1-gradio-demo/docs/assets/astronaut.png",
+    "cfg_scale": 2.0,
+    "baseline_seed": 42,
+    "scope": "controlled demonstration; not a quantitative benchmark or BF16 parity study"
+  },
+  "runtime": {
+    "mode": "real",
+    "loaded": true,
+    "model": "Multimodal Flow 1.6B SFT",
+    "device": "NVIDIA GeForce RTX 2080 SUPER",
+    "compute_capability": "7.5",
+    "vram_gib": 7.6,
+    "weights": "ema",
+    "checkpoint": "/dev/shm/mf1-models/MF_weights/MF/sft",
+    "load_seconds": 20.7,
+    "release_codecs_on_task_switch": true,
+    "precision": "fp16",
+    "codec_precision": "fp32",
+    "codec_device": "cuda:1",
+    "attention_backend": "sdpa",
+    "experimental": true,
+    "vram_warning": "Only 7.6 GiB VRAM is visible; 20+ GiB is recommended. Close other GPU applications and expect possible out-of-memory errors."
+  },
+  "repeatability": {
+    "same_seed_pixels_identical": true,
+    "different_seed_pixels_differ": true
+  },
+  "completed_at_unix": 1791277507.2074447,
+  "gpu_monitor": {
+    "csv": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-experiments/gpu.csv",
+    "interval_seconds": 0.5,
+    "samples": 1200,
+    "devices": {
+      "0": {
+        "uuid": "GPU-835f8262-5251-9f0f-5dc4-013fa2f735de",
+        "name": "NVIDIA GeForce RTX 2080 SUPER",
+        "total_mib": 8192.0,
+        "peak_used_mib": 4024.0,
+        "peak_utilization_percent": 93.0
+      },
+      "1": {
+        "uuid": "GPU-aec1288f-4556-3b77-af1b-45bf7ee3d8f5",
+        "name": "NVIDIA GeForce RTX 2080 SUPER",
+        "total_mib": 8192.0,
+        "peak_used_mib": 2757.0,
+        "peak_utilization_percent": 41.0
+      }
+    },
+    "errors": [],
+    "scope": "whole-device memory, including other processes; sampled peaks"
+  }
+}

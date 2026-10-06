@@ -1,0 +1,30 @@
+{
+  "url": "http://127.0.0.1:7860",
+  "tabs": [
+    {
+      "tab": "text-to-image",
+      "status": "passed",
+      "browser_elapsed_seconds": 16.14,
+      "image_src": "http://127.0.0.1:7860/gradio_api/file=/dev/shm/mf1-tmp/gradio/0a667ea084803ee1aa6f4f468047be3bee77043cb238aef4fa53c57fe4e3256d/image.png"
+    },
+    {
+      "tab": "image-to-text",
+      "status": "passed",
+      "browser_elapsed_seconds": 30.31,
+      "text": "The image depicts an astronaut wearing a white space suit, floating in the blackness of space. The astronaut is"
+    },
+    {
+      "tab": "text-continuation",
+      "status": "passed",
+      "browser_elapsed_seconds": 15.5,
+      "text": "represent a wide range of types of data through digital formats, such as images, audio, text, and videos. These representations are widely applied to data in digital imaging, content analysis, and media analysis. In recent applications, continuous multimodal representations have been used to model biological systems like graphural data, genetic and sensory data, as well as finance, entertainment, and medical information. In other fields, continuous multimodal representations have been utilized to interpret human and interpersonal experiences, digital games, and information games. The development of continuous multimodal"
+    },
+    {
+      "tab": "system-information",
+      "status": "passed",
+      "browser_elapsed_seconds": 0.2
+    }
+  ],
+  "browser_errors": [],
+  "video": "/home/nancy/Desktop/sahil/mf1-gradio-demo/outputs/mf1-browser/page@23c7077efc62b33373cf0b0c055b3af4.webm"
+}

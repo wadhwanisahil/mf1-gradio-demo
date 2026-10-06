@@ -1,0 +1,12 @@
+[
+  {
+    "path": "/dev/shm/mf1-models/MF_weights/MF/sft/model.safetensors",
+    "bytes": 3277220832,
+    "sha256": "2f3a3531ee85307313b55b802db62ceda028e1c7de7d9baf739b7e18ce8c6013"
+  },
+  {
+    "path": "/dev/shm/mf1-models/assets/scale_rae_decoder/model.pt",
+    "bytes": 1662529538,
+    "sha256": "ca7e6b907bb51455a12eea39b6acb1999c2133f325c123cda20ceb206d1ef3cb"
+  }
+]

@@ -64,7 +64,10 @@ def _number(value: int | float, label: str, *, minimum: float, maximum: float) -
 def tensor_to_pil(tensor: Any) -> Image.Image:
     """Convert one MF image tensor in ``[-1, 1]`` to an RGB PIL image."""
 
-    pixels = (tensor.detach().cpu().float().clamp(-1, 1) + 1) * 127.5
+    pixels = tensor.detach().cpu().float()
+    if not bool(pixels.isfinite().all()):
+        raise BackendError("MF generated non-finite image values; check inference precision.")
+    pixels = (pixels.clamp(-1, 1) + 1) * 127.5
     array = pixels.permute(1, 2, 0).numpy().round().astype(np.uint8)
     return Image.fromarray(array, mode="RGB")
 
@@ -76,6 +79,16 @@ class RuntimeOptions:
     device: str = "cuda:0"
     weights: str = "ema"
     release_codecs_on_task_switch: bool = True
+    precision: str = "bf16"
+    codec_device: str | None = None
+    attention_backend: str = "flex"
+    allow_low_vram: bool = False
+
+    def __post_init__(self) -> None:
+        if self.precision not in {"bf16", "fp16"}:
+            raise BackendError("MF_PRECISION must be 'bf16' or 'fp16'.")
+        if self.attention_backend not in {"flex", "sdpa"}:
+            raise BackendError("MF_ATTENTION_BACKEND must be 'flex' or 'sdpa'.")
 
     @classmethod
     def from_env(cls) -> "RuntimeOptions":
@@ -100,6 +113,10 @@ class RuntimeOptions:
             device=os.environ.get("MF_DEVICE", "cuda:0"),
             weights=weights,
             release_codecs_on_task_switch=release,
+            precision=os.environ.get("MF_PRECISION", "bf16"),
+            codec_device=os.environ.get("MF_CODEC_DEVICE") or None,
+            attention_backend=os.environ.get("MF_ATTENTION_BACKEND", "flex"),
+            allow_low_vram=os.environ.get("MF_ALLOW_LOW_VRAM") == "1",
         )
 
 
@@ -141,6 +158,7 @@ class MFBackend:
                 )
 
             os.environ["MF_ASSETS_ROOT"] = str(assets_root)
+            os.environ["MF_ATTENTION_BACKEND"] = self.options.attention_backend
             try:
                 import torch
                 from mf.inference.pipeline import MFPipeline
@@ -163,18 +181,22 @@ class MFBackend:
             vram_gib = properties.total_memory / (1024**3)
             with torch.cuda.device(index):
                 bf16_supported = torch.cuda.is_bf16_supported()
-            if capability[0] < 8 or not bf16_supported:
+            if self.options.precision == "bf16" and (capability[0] < 8 or not bf16_supported):
                 raise BackendError(
                     f"{properties.name} does not provide the native BF16 support required "
                     "for this demo. Use an Ampere-or-newer GPU."
                 )
-            if vram_gib < MIN_SUPPORTED_VRAM_GIB:
+            if vram_gib < MIN_SUPPORTED_VRAM_GIB and not self.options.allow_low_vram:
                 raise BackendError(
                     f"Only {vram_gib:.1f} GiB VRAM is visible. A single GPU with at least "
                     f"{MIN_SUPPORTED_VRAM_GIB:.0f} GiB is required even for an experimental "
                     "run. "
                     "VRAM from multiple cards is not combined automatically."
                 )
+            if self.options.codec_device is not None:
+                codec_device = torch.device(self.options.codec_device)
+                if codec_device.type == "cuda":
+                    torch.cuda.get_device_properties(codec_device)
             vram_warning = (
                 f"Only {vram_gib:.1f} GiB VRAM is visible; 20+ GiB is recommended. "
                 "Close other GPU applications and expect possible out-of-memory errors."
@@ -188,6 +210,8 @@ class MFBackend:
                     checkpoint,
                     device=self.options.device,
                     weights=self.options.weights,
+                    inference_dtype=(torch.float16 if self.options.precision == "fp16" else None),
+                    codec_device=self.options.codec_device,
                 )
             except Exception as error:
                 raise BackendError(f"MF-1 failed to load: {error}") from error
@@ -211,6 +235,11 @@ class MFBackend:
                 "checkpoint": str(checkpoint),
                 "load_seconds": round(time.perf_counter() - started, 2),
                 "release_codecs_on_task_switch": (self.options.release_codecs_on_task_switch),
+                "precision": self.options.precision,
+                "codec_precision": "fp32" if self.options.precision == "fp16" else "bf16",
+                "codec_device": self.options.codec_device or self.options.device,
+                "attention_backend": self.options.attention_backend,
+                "experimental": self.options.precision != "bf16" or self.options.allow_low_vram,
             }
             if vram_warning is not None:
                 self._status["vram_warning"] = vram_warning
@@ -235,17 +264,34 @@ class MFBackend:
             gc.collect()
             with self._torch.cuda.device(self.options.device):
                 self._torch.cuda.empty_cache()
+            if self.options.codec_device and self.options.codec_device.startswith("cuda"):
+                with self._torch.cuda.device(self.options.codec_device):
+                    self._torch.cuda.empty_cache()
         self._active_task = name
         self._torch.cuda.reset_peak_memory_stats(self.options.device)
+        if self.options.codec_device and self.options.codec_device.startswith("cuda"):
+            self._torch.cuda.reset_peak_memory_stats(self.options.codec_device)
         return pipeline
 
     def _metadata(self, *, task: str, seed: int, started: float, **settings: Any) -> dict[str, Any]:
+        self._torch.cuda.synchronize(self.options.device)
+        if self.options.codec_device and self.options.codec_device.startswith("cuda"):
+            self._torch.cuda.synchronize(self.options.codec_device)
         peak = self._torch.cuda.max_memory_allocated(self.options.device) / (1024**3)
+        devices = {self.options.device}
+        if self.options.codec_device and self.options.codec_device.startswith("cuda"):
+            devices.add(self.options.codec_device)
         return {
             "task": task,
             "seed": seed,
             "elapsed_seconds": round(time.perf_counter() - started, 2),
             "peak_allocated_vram_gib": round(peak, 2),
+            "peak_allocated_vram_by_device_gib": {
+                device: round(self._torch.cuda.max_memory_allocated(device) / (1024**3), 2)
+                for device in sorted(devices)
+            },
+            "precision": self.options.precision,
+            "attention_backend": self.options.attention_backend,
             **settings,
         }
 
@@ -375,7 +421,7 @@ class MFBackend:
         steps: int | float,
         cfg: int | float,
         seed: int | float | None,
-        stop: str = "",
+        stop: str | None = "",
     ) -> tuple[str, dict[str, Any]]:
         prompt = require_text(prompt, "Text prefix")
         target_length = _integer(
@@ -384,7 +430,7 @@ class MFBackend:
         steps = _integer(steps, "Inference steps", minimum=1, maximum=64)
         cfg = _number(cfg, "CFG scale", minimum=0.0, maximum=12.0)
         seed = normalize_seed(seed)
-        stops = tuple(value.strip() for value in stop.splitlines() if value.strip())
+        stops = tuple(value.strip() for value in (stop or "").splitlines() if value.strip())
 
         with self._lock:
             pipeline = self._prepare_task("text-continuation")
@@ -419,10 +465,14 @@ class MFBackend:
                 self._pipeline.close()
             self._pipeline = None
             self._active_task = None
+            self._status["loaded"] = False
             gc.collect()
             if self._torch is not None and self._torch.cuda.is_available():
                 with self._torch.cuda.device(self.options.device):
                     self._torch.cuda.empty_cache()
+                if self.options.codec_device and self.options.codec_device.startswith("cuda"):
+                    with self._torch.cuda.device(self.options.codec_device):
+                        self._torch.cuda.empty_cache()
 
 
 class MockBackend:

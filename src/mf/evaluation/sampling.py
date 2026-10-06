@@ -823,6 +823,8 @@ def _prediction(output: object, name: str, expected: Tensor) -> Tensor:
         raise TypeError(f"model output must provide tensor {name}")
     if prediction.shape != expected.shape or prediction.device != expected.device:
         raise ValueError(f"{name} must match the target latent shape and device")
+    if not bool(torch.isfinite(prediction).all()):
+        raise RuntimeError(f"{name} contains non-finite values; inference precision is unstable")
     return prediction
 
 

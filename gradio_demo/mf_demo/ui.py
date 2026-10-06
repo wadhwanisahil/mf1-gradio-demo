@@ -58,11 +58,13 @@ def _resolved_seed(seed: int | float | None, randomize: bool) -> int:
 def build_demo(backend: Any) -> gr.Blocks:
     defaults = backend.defaults
     status = backend.status()
-    badge = (
-        "Mock preview · no model inference"
-        if backend.is_mock
-        else f"Ready · {status.get('device', 'CUDA')} · {status.get('model', 'MF-1')}"
-    )
+    if backend.is_mock:
+        badge = "Mock preview · no model inference"
+    elif not status.get("loaded"):
+        badge = "MF-1 · loads on first request"
+    else:
+        label = "Experimental MF-1" if status.get("experimental") else "Ready"
+        badge = f"{label} · {status.get('device', 'CUDA')} · {status.get('model', 'MF-1')}"
 
     def run_image(prompt, steps, cfg, method, seed, randomize, progress=gr.Progress()):
         selected_seed = _resolved_seed(seed, randomize)
@@ -163,7 +165,17 @@ def build_demo(backend: Any) -> gr.Blocks:
                             lines=4,
                             placeholder="A quiet observatory above the clouds...",
                         )
-                        gr.Examples(T2I_EXAMPLES, inputs=image_prompt, label="Examples")
+                        image_examples = gr.Dropdown(
+                            choices=[example[0] for example in T2I_EXAMPLES],
+                            label="Examples",
+                            interactive=True,
+                        )
+                        image_examples.input(
+                            lambda value: value,
+                            inputs=image_examples,
+                            outputs=image_prompt,
+                            api_name=False,
+                        )
                         with gr.Accordion("Generation controls", open=True):
                             image_steps = gr.Slider(
                                 4,
@@ -203,6 +215,7 @@ def build_demo(backend: Any) -> gr.Blocks:
                         image_output = gr.Image(
                             label="MF-1 output",
                             type="pil",
+                            format="png",
                             interactive=False,
                             height=500,
                         )
@@ -321,7 +334,17 @@ def build_demo(backend: Any) -> gr.Blocks:
                             lines=5,
                             placeholder="A short language model can",
                         )
-                        gr.Examples(TEXT_EXAMPLES, inputs=text_prompt, label="Examples")
+                        text_examples = gr.Dropdown(
+                            choices=[example[0] for example in TEXT_EXAMPLES],
+                            label="Examples",
+                            interactive=True,
+                        )
+                        text_examples.input(
+                            lambda value: value,
+                            inputs=text_examples,
+                            outputs=text_prompt,
+                            api_name=False,
+                        )
                         with gr.Accordion("Generation controls", open=False):
                             text_length = gr.Slider(
                                 8, 512, value=128, step=8, label="Maximum continuation length"

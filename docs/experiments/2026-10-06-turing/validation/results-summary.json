@@ -1,0 +1,25 @@
+{
+  "automated_tests_passed": 20,
+  "preflight": {
+    "PASS": 13,
+    "WARN": 2,
+    "FAIL": 0
+  },
+  "real_smoke_paths": [
+    "text-to-image",
+    "image-to-text",
+    "text-continuation"
+  ],
+  "controlled_experiments_passed": 14,
+  "real_endpoints_passed": 4,
+  "browser_tabs_passed": 4,
+  "browser_page_errors": [],
+  "repeatability": {
+    "same_seed_pixels_identical": true,
+    "different_seed_pixels_differ": true
+  },
+  "model_load_seconds": 20.31,
+  "experimental": true,
+  "official_bf16_parity_tested": false,
+  "dataset_benchmark_tested": false
+}

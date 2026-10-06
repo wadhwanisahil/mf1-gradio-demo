@@ -77,6 +77,8 @@ class MFPipeline:
         self.config = bundle.config
         self.device = bundle.device
         self._sampler = checkpoint_sampler_config(bundle.config)
+        if bundle.inference_dtype is not None:
+            self._sampler = replace(self._sampler, amp_dtype=bundle.inference_dtype)
 
     @classmethod
     def from_checkpoint(
@@ -87,6 +89,8 @@ class MFPipeline:
         weights: WeightSource = "ema",
         compile_blocks: bool = False,
         extensions: Sequence[str] = (),
+        inference_dtype: torch.dtype | None = None,
+        codec_device: str | torch.device | None = None,
     ) -> MFPipeline:
         from mf.extensions import load_extensions
 
@@ -98,6 +102,8 @@ class MFPipeline:
                 weights=weights,
                 compile_blocks=compile_blocks,
                 extensions=extensions,
+                inference_dtype=inference_dtype,
+                codec_device=codec_device,
             )
         )
 

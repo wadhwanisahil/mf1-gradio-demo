@@ -31,9 +31,12 @@ A100, or newer card is appropriate.
 - One RTX 3090 should be sufficient, subject to the final smoke test.
 - A 12 GB RTX 3060 is allowed as an experimental run, but may run out of memory
   and should not replace validation on the 3090.
-- An 8 GB card is not sufficient for this configuration.
+- An 8 GB card fails the default configuration's hardware checks. The opt-in
+  compatibility configuration below uses FP16 and can place codecs on a second
+  GPU; it must be validated separately from the released BF16 configuration.
 - Two 8 GB cards do **not** become a 16 GB device. MF inference is single-device
-  and this demo intentionally does not claim model-parallel support.
+  and this demo does not shard the backbone. Codec placement on another GPU is
+  explicit and does not combine the cards' memory into one device.
 - Close other GPU-heavy applications before loading the model. A display attached
   to the same GPU also consumes VRAM.
 
@@ -80,6 +83,81 @@ pip install -r gradio_demo/requirements.txt
 
 The official environment uses Python 3.11 and pins the MF dependencies. Do not
 replace it with the unrelated packages from a system Python installation.
+The demo pins Gradio 6.17.3 and preserves the official Hugging Face Hub 0.36.2
+version. Gradio 6.29.1 requires Hub 1.x or newer, which is incompatible
+with the official Transformers 4.57.1 dependency. After installing, verify the
+combined environment with `python -m pip check`.
+
+## Compatibility configuration for two RTX 2080 SUPER GPUs
+
+The [6 October 2026 experiment report](../docs/experiments/2026-10-06-turing/REPORT.md)
+includes real outputs for all three task paths, 14 controlled experiments,
+GPU measurements, and live API/browser validation on this configuration.
+
+This optional configuration retains the official checkpoint, architecture,
+samplers, and chunk visibility rules. The backbone uses FP16; encoders and the
+image decoder remain FP32. PyTorch SDPA evaluates the exact MF chunk mask instead
+of compiled FlexAttention. Encoders and the image decoder can run on a second
+GPU, returning their outputs to the backbone's device.
+
+It is an experimental numerical configuration, not proof of parity with native
+BF16. Never enable it merely to bypass checks without running the real tests.
+The default BF16 behavior and its hardware requirements remain available.
+
+Create the compatibility environment from the repository root:
+
+```bash
+conda env create -f gradio_demo/environment-compat.yaml
+conda activate multimodal-flow-compat
+python -m pip check
+```
+
+This retains the official MF version pins and omits FlashAttention, which is
+optional for the SDPA path and whose standard CUDA implementation does not
+support the RTX 2080 SUPER. Select both physical GPUs before starting Python:
+
+```bash
+export CUDA_VISIBLE_DEVICES=0,1
+export MF_DEVICE=cuda:0
+export MF_CODEC_DEVICE=cuda:1
+export MF_PRECISION=fp16
+export MF_ATTENTION_BACKEND=sdpa
+export MF_ALLOW_LOW_VRAM=1
+```
+
+Download assets and set `MF_CHECKPOINT` and `MF_ASSETS_ROOT` as described below.
+Run preflight, smoke testing, and the controlled experiments:
+
+```bash
+python gradio_demo/scripts/preflight.py
+python gradio_demo/scripts/smoke_test.py \
+  --checkpoint "$MF_CHECKPOINT" --assets-root "$MF_ASSETS_ROOT"
+python gradio_demo/scripts/experiments.py
+```
+
+`experiments.py` runs 14 real requests: image generation with 16/32/64 steps
+using ODE and SDE, a second seed and a same-seed repeat, and caption/text
+continuation with 8/16/32 steps. It writes every output and a report incrementally
+to `outputs/mf1-experiments/`. This is a controlled demonstration, not a dataset
+benchmark. Reports include experimental configuration details, per-device
+allocated memory peaks, and sampled whole-device measurements from `nvidia-smi`.
+
+To test all four real endpoints, start the application in a separate terminal
+with the same environment, then run:
+
+```bash
+python gradio_demo/scripts/test_endpoints.py
+```
+
+The endpoint checker rejects mock or unloaded servers. `MF_CODEC_DEVICE=cpu` is
+also available for explicit codec offloading, but timings will differ. The
+backbone continues to require CUDA.
+
+On a machine with insufficient disk space, `HF_HOME`, model/asset destinations,
+and temporary package storage can point to a sufficiently large RAM-backed
+filesystem. **RAM-backed assets and packages disappear on reboot.** Preserve
+the small output artifacts and report on persistent storage; plan disk capacity
+for a durable installation.
 
 ## Download only the required assets
 
@@ -186,6 +264,10 @@ The following environment variables are also supported:
 | `MF_CHECKPOINT` | required | Released `MF/sft` directory |
 | `MF_ASSETS_ROOT` | required | Parent of `scale_rae_decoder/` |
 | `MF_DEVICE` | `cuda:0` | Single CUDA device used for inference |
+| `MF_PRECISION` | `bf16` | Backbone inference precision; `fp16` is experimental |
+| `MF_CODEC_DEVICE` | backbone device | Optional second GPU or CPU for frozen codecs |
+| `MF_ATTENTION_BACKEND` | `flex` | `flex` or exact-mask PyTorch `sdpa` |
+| `MF_ALLOW_LOW_VRAM` | `0` | Explicit experimental override of the 10 GiB check |
 | `MF_WEIGHTS` | `ema` | `ema` or `raw` checkpoint weights |
 | `MF_RELEASE_CODECS_ON_TASK_SWITCH` | `1` | Release lazy modality codecs when switching tasks |
 | `MF_MOCK` | `0` | Set to `1` for mock mode |

@@ -8,6 +8,7 @@ from typing import Protocol
 import torch
 from torch import Tensor, nn
 
+from mf.codecs.placement import DeviceCodec
 from mf.contracts.batch import TEXT_TOKENS
 from mf.data.text import TokenizedTextBlock, tokenize_caption, tokenize_condition
 from mf.evaluation.sampling import (
@@ -209,7 +210,7 @@ class T2IImageGenerator:
     def _vision_decoder(self) -> VisionDecoder:
         if self._decoder is None:
             decoder = self.decoder_factory()
-            if isinstance(decoder, nn.Module):
+            if isinstance(decoder, nn.Module) and not isinstance(decoder, DeviceCodec):
                 decoder = decoder.to(self.device)
             self._decoder = decoder
         return self._decoder
@@ -271,7 +272,7 @@ class ImageOnlyGenerator:
     def _vision_decoder(self) -> VisionDecoder:
         if self._decoder is None:
             decoder = self.decoder_factory()
-            if isinstance(decoder, nn.Module):
+            if isinstance(decoder, nn.Module) and not isinstance(decoder, DeviceCodec):
                 decoder = decoder.to(self.device)
             self._decoder = decoder
         return self._decoder

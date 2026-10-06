@@ -1,0 +1,92 @@
+[
+  {
+    "level": "INFO",
+    "name": "platform",
+    "detail": "Linux-6.8.0-107-generic-x86_64-with-glibc2.39"
+  },
+  {
+    "level": "INFO",
+    "name": "python",
+    "detail": "3.11.16"
+  },
+  {
+    "level": "INFO",
+    "name": "free disk",
+    "detail": "6.1 GiB"
+  },
+  {
+    "level": "PASS",
+    "name": "package torch",
+    "detail": "2.8.0+cu126"
+  },
+  {
+    "level": "PASS",
+    "name": "package torchvision",
+    "detail": "0.23.0+cu126"
+  },
+  {
+    "level": "PASS",
+    "name": "package transformers",
+    "detail": "4.57.1"
+  },
+  {
+    "level": "PASS",
+    "name": "package gradio",
+    "detail": "6.17.3"
+  },
+  {
+    "level": "PASS",
+    "name": "package multimodal-flow",
+    "detail": "0.1.0"
+  },
+  {
+    "level": "PASS",
+    "name": "CUDA device",
+    "detail": "NVIDIA GeForce RTX 2080 SUPER; 7.6 GiB; capability 7.5"
+  },
+  {
+    "level": "WARN",
+    "name": "precision",
+    "detail": "experimental FP16; encoders remain FP32"
+  },
+  {
+    "level": "WARN",
+    "name": "minimum VRAM",
+    "detail": "7.6 GiB visible; low-VRAM opt-in: True"
+  },
+  {
+    "level": "PASS",
+    "name": "codec device",
+    "detail": "cuda:1: NVIDIA GeForce RTX 2080 SUPER"
+  },
+  {
+    "level": "PASS",
+    "name": "checkpoint config",
+    "detail": "/dev/shm/mf1-models/MF_weights/MF/sft/config.json (0.0 MB)"
+  },
+  {
+    "level": "PASS",
+    "name": "MF-1 SFT weights",
+    "detail": "/dev/shm/mf1-models/MF_weights/MF/sft/model.safetensors (3277.2 MB)"
+  },
+  {
+    "level": "PASS",
+    "name": "text decoder",
+    "detail": "/dev/shm/mf1-models/MF_weights/Text Decoder/text_decoder.safetensors (71.6 MB)"
+  },
+  {
+    "level": "PASS",
+    "name": "vision statistics",
+    "detail": "/dev/shm/mf1-models/MF_weights/Vision statistics/vision_stats.pt (2.4 MB)"
+  },
+  {
+    "level": "PASS",
+    "name": "Scale RAE config",
+    "detail": "/dev/shm/mf1-models/assets/scale_rae_decoder/config.json (0.0 MB)"
+  },
+  {
+    "level": "PASS",
+    "name": "Scale RAE weights",
+    "detail": "/dev/shm/mf1-models/assets/scale_rae_decoder/model.pt (1662.5 MB)"
+  }
+]

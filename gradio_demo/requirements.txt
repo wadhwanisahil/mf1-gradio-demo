@@ -1,2 +1,6 @@
 # UI dependency added on top of the repository's pinned environment.yaml.
-gradio==6.29.1
+# Gradio 6.29.1 requires Hub 1.x+, which conflicts with MF's Transformers 4.57.1.
+gradio==6.17.3
+huggingface-hub==0.36.2
+# Preserve the official typing extensions pin when resolving UI dependencies.
+typing_extensions==4.15.0

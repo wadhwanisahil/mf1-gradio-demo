@@ -1,0 +1,82 @@
+import json
+import time
+from pathlib import Path
+
+from playwright.sync_api import expect, sync_playwright
+
+root = Path(__file__).resolve().parents[2]
+out = root / 'outputs/mf1-browser'
+out.mkdir(exist_ok=True)
+report = {'url': 'http://127.0.0.1:7860', 'tabs': [], 'browser_errors': []}
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(executable_path='/usr/bin/google-chrome', headless=True,
+                                args=['--disable-dev-shm-usage', '--disable-gpu'])
+    context = browser.new_context(viewport={'width': 1440, 'height': 1080},
+                                  record_video_dir=str(out),
+                                  record_video_size={'width': 1440, 'height': 1080})
+    page = context.new_page()
+    page.on('pageerror', lambda error: report['browser_errors'].append(error.stack))
+    page.goto(report['url'], wait_until='networkidle')
+
+    def record(tab, started, **kwargs):
+        page.screenshot(path=str(out / (tab + '.png')), full_page=True)
+        report['tabs'].append({'tab': tab, 'status': 'passed',
+                               'browser_elapsed_seconds': round(time.perf_counter()-started, 2),
+                               **kwargs})
+        (out / 'report.json').write_text(json.dumps(report, indent=2))
+        print(tab, 'passed', flush=True)
+
+    start = time.perf_counter()
+    image_prompt = 'A quiet observatory above the clouds, cinematic moonlight.'
+    page.get_by_role('listbox', name='Examples', exact=True).first.click()
+    page.get_by_role('option', name=image_prompt, exact=True).click()
+    expect(page.get_by_role('textbox', name='Image description', exact=True)).to_have_value(image_prompt)
+    page.get_by_role('slider', name='range slider for Flow steps', exact=True).first.evaluate(
+        "el => {el.value='16'; el.dispatchEvent(new Event('input', {bubbles:true})); el.dispatchEvent(new Event('change', {bubbles:true}));}")
+    page.get_by_role('checkbox', name='Randomize seed', exact=True).first.uncheck()
+    page.get_by_role('button', name='Generate image', exact=True).click()
+    output_image = page.locator('img[src*="/gradio_api/file"]').last
+    output_image.wait_for(state='visible', timeout=180000)
+    assert output_image.evaluate('el => el.naturalWidth') > 0
+    record('text-to-image', start, image_src=output_image.get_attribute('src'))
+
+    page.get_by_role('tab', name='Image → Text', exact=True).click()
+    start = time.perf_counter()
+    page.locator('input[type=file]').first.set_input_files(
+        str(root / 'docs/assets/astronaut.png'))
+    page.get_by_role('button', name='Analyze image', exact=True).click()
+    response = page.get_by_role('textbox', name='MF-1 response', exact=True)
+    expect(response).not_to_have_value('', timeout=90000)
+    assert 'astronaut' in response.input_value().lower()
+    record('image-to-text', start, text=response.input_value())
+
+    page.get_by_role('tab', name='Text continuation', exact=True).click()
+    start = time.perf_counter()
+    text_prompt = 'Continuous multimodal representations make it possible to'
+    page.get_by_role('listbox', name='Examples', exact=True).last.click()
+    page.get_by_role('option', name=text_prompt, exact=True).click()
+    expect(page.get_by_role('textbox', name='Text prefix', exact=True)).to_have_value(text_prompt)
+    print('Text prefix selected; submitting continuation', flush=True)
+    page.get_by_role('button', name='Continue text', exact=True).click()
+    response = page.get_by_role('textbox', name='MF-1 continuation', exact=True)
+    try:
+        expect(response).not_to_have_value('', timeout=60000)
+    except Exception:
+        page.screenshot(path=str(out / 'continuation-failure.png'), full_page=True)
+        (out / 'continuation-failure.txt').write_text(page.locator('body').inner_text())
+        raise
+    assert len(response.input_value().strip()) > 0
+    record('text-continuation', start, text=response.input_value())
+
+    start = time.perf_counter()
+    page.get_by_role('tab', name='System information', exact=True).click()
+    body = page.locator('body').inner_text()
+    assert 'fp16' in body and 'sdpa' in body and 'real' in body
+    record('system-information', start)
+    video = page.video.path()
+    context.close()
+    browser.close()
+    report['video'] = str(video)
+    assert not report['browser_errors'], report['browser_errors']
+    (out / 'report.json').write_text(json.dumps(report, indent=2))

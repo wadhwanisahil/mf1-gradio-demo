@@ -1,0 +1,31 @@
+test_caption_and_text (test_backend.MockBackendTests.test_caption_and_text) ... ok
+test_caption_requires_image (test_backend.MockBackendTests.test_caption_requires_image) ... ok
+test_images_are_reproducible (test_backend.MockBackendTests.test_images_are_reproducible) ... ok
+test_compatibility_options_are_explicit (test_backend.ValidationTests.test_compatibility_options_are_explicit) ... ok
+test_runtime_options_from_environment (test_backend.ValidationTests.test_runtime_options_from_environment) ... ok
+test_runtime_options_require_paths (test_backend.ValidationTests.test_runtime_options_require_paths) ... ok
+test_seed_validation (test_backend.ValidationTests.test_seed_validation) ... ok
+test_text_validation (test_backend.ValidationTests.test_text_validation) ... ok
+test_missing_file_fails (test_preflight.PreflightTests.test_missing_file_fails) ... ok
+test_small_file_is_detected_as_incomplete (test_preflight.PreflightTests.test_small_file_is_detected_as_incomplete) ... ok
+test_valid_file_passes (test_preflight.PreflightTests.test_valid_file_passes) ... ok
+test_codec_roundtrip_between_gpus (test_runtime.RuntimeTests.test_codec_roundtrip_between_gpus) ... ok
+test_continuation_accepts_unset_optional_stop_field (test_runtime.RuntimeTests.test_continuation_accepts_unset_optional_stop_field) ... ok
+test_non_finite_image_is_rejected_before_clamping (test_runtime.RuntimeTests.test_non_finite_image_is_rejected_before_clamping) ... ok
+test_non_finite_prediction_is_rejected (test_runtime.RuntimeTests.test_non_finite_prediction_is_rejected) ... ok
+test_sdpa_preserves_official_noisy_text_blocks (test_runtime.RuntimeTests.test_sdpa_preserves_official_noisy_text_blocks) ... ok
+test_sdpa_preserves_sequence_and_chunk_visibility (test_runtime.RuntimeTests.test_sdpa_preserves_sequence_and_chunk_visibility) ... ok
+/tmp/mf1-validation-env/lib/python3.11/asyncio/base_events.py:693: ResourceWarning: unclosed event loop <_UnixSelectorEventLoop running=False closed=False debug=False>
+  _warn(f"unclosed event loop {self!r}", ResourceWarning, source=self)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/tmp/mf1-validation-env/lib/python3.11/asyncio/base_events.py:693: ResourceWarning: unclosed event loop <_UnixSelectorEventLoop running=False closed=False debug=False>
+  _warn(f"unclosed event loop {self!r}", ResourceWarning, source=self)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_style_is_loaded_at_launch (test_ui.UITests.test_style_is_loaded_at_launch) ... ok
+test_ui_contains_research_tasks (test_ui.UITests.test_ui_contains_research_tasks) ... ok
+test_ui_has_expected_api_endpoints (test_ui.UITests.test_ui_has_expected_api_endpoints) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.737s
+
+OK

@@ -40,7 +40,15 @@ def _file_check(name: str, path: Path, minimum_bytes: int) -> Check:
     return Check("PASS", name, f"{path} ({size / 1_000_000:.1f} MB)")
 
 
-def inspect_host(checkpoint: Path | None, assets_root: Path | None) -> list[Check]:
+def inspect_host(
+    checkpoint: Path | None,
+    assets_root: Path | None,
+    *,
+    device: str = "cuda:0",
+    precision: str = "bf16",
+    allow_low_vram: bool = False,
+    codec_device: str | None = None,
+) -> list[Check]:
     checks = [
         Check("INFO", "platform", platform.platform()),
         Check("INFO", "python", sys.version.split()[0]),
@@ -76,8 +84,9 @@ def inspect_host(checkpoint: Path | None, assets_root: Path | None) -> list[Chec
         elif not cuda.is_available():
             checks.append(Check("FAIL", "CUDA", "not available to PyTorch"))
         else:
-            properties = cuda.get_device_properties(0)
-            capability = cuda.get_device_capability(0)
+            selected = torch.device(device)
+            properties = cuda.get_device_properties(selected)
+            capability = cuda.get_device_capability(selected)
             vram = properties.total_memory / (1024**3)
             checks.append(
                 Check(
@@ -86,16 +95,20 @@ def inspect_host(checkpoint: Path | None, assets_root: Path | None) -> list[Chec
                     f"{properties.name}; {vram:.1f} GiB; capability {capability[0]}.{capability[1]}",
                 )
             )
-            if capability[0] < 8 or not cuda.is_bf16_supported():
+            with cuda.device(selected):
+                bf16_supported = cuda.is_bf16_supported()
+            if precision == "fp16":
+                checks.append(Check("WARN", "precision", "experimental FP16; encoders remain FP32"))
+            elif capability[0] < 8 or not bf16_supported:
                 checks.append(Check("FAIL", "native BF16", "not supported"))
             else:
                 checks.append(Check("PASS", "native BF16", "supported"))
             if vram < 10:
                 checks.append(
                     Check(
-                        "FAIL",
+                        "WARN" if allow_low_vram else "FAIL",
                         "minimum VRAM",
-                        f"{vram:.1f} GiB visible; at least 10 GiB on one GPU is required",
+                        f"{vram:.1f} GiB visible; low-VRAM opt-in: {allow_low_vram}",
                     )
                 )
             elif vram < 20:
@@ -108,6 +121,15 @@ def inspect_host(checkpoint: Path | None, assets_root: Path | None) -> list[Chec
                 )
             else:
                 checks.append(Check("PASS", "recommended VRAM", f"{vram:.1f} GiB"))
+            if codec_device is not None:
+                target = torch.device(codec_device)
+                if target.type == "cuda":
+                    codec_properties = cuda.get_device_properties(target)
+                    checks.append(
+                        Check("PASS", "codec device", f"{target}: {codec_properties.name}")
+                    )
+                else:
+                    checks.append(Check("INFO", "codec device", str(target)))
 
     if checkpoint is None:
         checks.append(Check("FAIL", "MF_CHECKPOINT", "not provided"))
@@ -153,6 +175,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--assets-root", type=Path)
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON.")
+    parser.add_argument("--device", default=os.environ.get("MF_DEVICE", "cuda:0"))
+    parser.add_argument(
+        "--precision", choices=("bf16", "fp16"), default=os.environ.get("MF_PRECISION", "bf16")
+    )
+    parser.add_argument("--codec-device", default=os.environ.get("MF_CODEC_DEVICE"))
+    parser.add_argument(
+        "--allow-low-vram", action="store_true", default=os.environ.get("MF_ALLOW_LOW_VRAM") == "1"
+    )
     return parser.parse_args()
 
 
@@ -160,7 +190,14 @@ def main() -> int:
     args = parse_args()
     checkpoint = _path_from_arg(args.checkpoint, "MF_CHECKPOINT")
     assets_root = _path_from_arg(args.assets_root, "MF_ASSETS_ROOT")
-    checks = inspect_host(checkpoint, assets_root)
+    checks = inspect_host(
+        checkpoint,
+        assets_root,
+        device=args.device,
+        precision=args.precision,
+        allow_low_vram=args.allow_low_vram,
+        codec_device=args.codec_device,
+    )
     if args.json:
         print(json.dumps([asdict(check) for check in checks], indent=2))
     else:

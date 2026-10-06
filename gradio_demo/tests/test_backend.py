@@ -48,6 +48,25 @@ class ValidationTests(unittest.TestCase):
         with patch.dict(os.environ, {}, clear=True), self.assertRaises(BackendError):
             RuntimeOptions.from_env()
 
+    def test_compatibility_options_are_explicit(self) -> None:
+        environment = {
+            "MF_CHECKPOINT": "/tmp/MF/sft",
+            "MF_ASSETS_ROOT": "/tmp/assets",
+            "MF_PRECISION": "fp16",
+            "MF_CODEC_DEVICE": "cuda:1",
+            "MF_ATTENTION_BACKEND": "sdpa",
+            "MF_ALLOW_LOW_VRAM": "1",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            options = RuntimeOptions.from_env()
+        self.assertEqual(options.precision, "fp16")
+        self.assertEqual(options.codec_device, "cuda:1")
+        self.assertEqual(options.attention_backend, "sdpa")
+        self.assertTrue(options.allow_low_vram)
+        with patch.dict(os.environ, {**environment, "MF_PRECISION": "fp8"}, clear=True):
+            with self.assertRaises(BackendError):
+                RuntimeOptions.from_env()
+
 
 class MockBackendTests(unittest.TestCase):
     def setUp(self) -> None:
