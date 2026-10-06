@@ -1,0 +1,2 @@
+# UI dependency added on top of the repository's pinned environment.yaml.
+gradio==6.29.1

@@ -130,6 +130,7 @@ your own training run.
 | 1. Prepare datasets and model assets | [Data preparation](docs/DATA.md) |
 | 2. Run pretraining or SFT | [Training](docs/TRAINING.md) |
 | 3. Use the resulting checkpoint | [Inference](docs/INFERENCE.md) |
+| Interactive MF-1 interface | [Gradio research demo](gradio_demo/README.md) |
 | Reference | [Architecture and extensions](docs/ARCHITECTURE.md) |
 
 The shortest complete path is:

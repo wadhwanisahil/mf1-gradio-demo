@@ -6,6 +6,8 @@ build/
 dist/
 outputs/
 checkpoints/
+/models/
+/MF_weights/
 /data/
 /assets/
 .env

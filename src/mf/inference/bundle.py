@@ -48,10 +48,16 @@ def _load_hf_model_state(
         name: tensor
         for name, tensor in state.items()
         if not name.startswith(_LATENT_STATS_PREFIX)
+        and name not in _LEGACY_REMOVED_MODEL_KEYS
     }
     assigned = model.load_state_dict(parameters, strict=False, assign=True)
     if set(assigned.missing_keys) != set(stats) or assigned.unexpected_keys:
-        raise RuntimeError("HF model weights do not match the configured architecture")
+        raise RuntimeError(
+            "HF model weights do not match the configured architecture: "
+            f"missing={len(assigned.missing_keys)} "
+            f"{assigned.missing_keys[:5]}, unexpected={len(assigned.unexpected_keys)} "
+            f"{assigned.unexpected_keys[:5]}"
+        )
     copied = model.load_state_dict(stats, strict=False)
     if set(copied.missing_keys) != set(parameters) or copied.unexpected_keys:
         raise RuntimeError("HF latent statistics do not match the model")

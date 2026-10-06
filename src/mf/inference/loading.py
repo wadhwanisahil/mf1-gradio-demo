@@ -53,6 +53,7 @@ class InferenceModelConfig(StrictModel):
     attention_mode: Literal["shared", "modality_specific"]
     ffn_mode: Literal["shared", "modality_specific"]
     fp32_boundaries: bool
+    gradient_checkpointing: bool = False
     compile_packed_blocks: bool = False
     text_input_bottleneck_dim: PositiveInt
     text_input_projection_mode: Literal["bottleneck", "linear"]
